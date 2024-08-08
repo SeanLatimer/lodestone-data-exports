@@ -6,6 +6,7 @@ table MinionTable {
 
 table Minion {
 	Id:uint32 (key);
+	SortOrder:uint32;
 	NameEn:string;
 	NameFr:string;
 	NameDe:string;

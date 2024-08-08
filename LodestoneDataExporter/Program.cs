@@ -16,7 +16,9 @@ namespace LodestoneDataExporter
 
         public static async Task Main(string[] args)
         {
-            var dataPath = args.Length > 0 ? args[0] : "C:/Program Files (x86)/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack";
+            var dataPath = args.Length > 0
+                ? args[0]
+                : "C:/Program Files (x86)/SquareEnix/FINAL FANTASY XIV - A Realm Reborn/game/sqpack";
             var cyalume = new Cyalume(dataPath, new LuminaOptions { PanicOnSheetChecksumMismatch = false });
 
             await Task.WhenAll(
@@ -88,7 +90,8 @@ namespace LodestoneDataExporter
                     var curClassJob = classJobTable.ClassJobs.FirstOrDefault(cj => cj.Id == classJob.RowId);
                     if (curClassJob == null)
                     {
-                        curClassJob = new ClassJob { Id = classJob.RowId, Parent = classJob.ClassJobParent.Row, JobIndex = classJob.JobIndex };
+                        curClassJob = new ClassJob
+                            { Id = classJob.RowId, Parent = classJob.ClassJobParent.Row, JobIndex = classJob.JobIndex };
                         classJobTable.ClassJobs.Add(curClassJob);
                     }
 
@@ -195,34 +198,34 @@ namespace LodestoneDataExporter
             {
                 var itemSheet = cyalume.GetExcelSheet<Lumina.Excel.GeneratedSheets.Item>(lang);
                 Parallel.ForEach(itemSheet, new ParallelOptions { MaxDegreeOfParallelism = 4 }, item =>
-                   {
-                       Item curItem;
-                       lock (itemTable.Items)
-                       {
-                           curItem = itemTable.Items.FirstOrDefault(i => i.Id == item.RowId);
-                           if (curItem == null)
-                           {
-                               curItem = new Item { Id = item.RowId };
-                               itemTable.Items.Add(curItem);
-                           }
-                       }
+                {
+                    Item curItem;
+                    lock (itemTable.Items)
+                    {
+                        curItem = itemTable.Items.FirstOrDefault(i => i.Id == item.RowId);
+                        if (curItem == null)
+                        {
+                            curItem = new Item { Id = item.RowId };
+                            itemTable.Items.Add(curItem);
+                        }
+                    }
 
-                       switch (lang)
-                       {
-                           case Language.English:
-                               curItem.NameEn = item.Name;
-                               break;
-                           case Language.Japanese:
-                               curItem.NameJa = item.Name;
-                               break;
-                           case Language.German:
-                               curItem.NameDe = item.Name;
-                               break;
-                           case Language.French:
-                               curItem.NameFr = item.Name;
-                               break;
-                       }
-                   });
+                    switch (lang)
+                    {
+                        case Language.English:
+                            curItem.NameEn = item.Name;
+                            break;
+                        case Language.Japanese:
+                            curItem.NameJa = item.Name;
+                            break;
+                        case Language.German:
+                            curItem.NameDe = item.Name;
+                            break;
+                        case Language.French:
+                            curItem.NameFr = item.Name;
+                            break;
+                    }
+                });
             }
 
             Serialize(Path.Join(OutputDir, "item_table.bin"), itemTable);
@@ -243,7 +246,7 @@ namespace LodestoneDataExporter
                         curMinion = minionTable.Minions.FirstOrDefault(m => m.Id == minion.RowId);
                         if (curMinion == null)
                         {
-                            curMinion = new Minion { Id = minion.RowId };
+                            curMinion = new Minion { Id = minion.RowId, SortOrder = minion.Order };
                             minionTable.Minions.Add(curMinion);
                         }
                     }
@@ -284,7 +287,7 @@ namespace LodestoneDataExporter
                         curMount = mountTable.Mounts.FirstOrDefault(m => m.Id == mount.RowId);
                         if (curMount == null)
                         {
-                            curMount = new Mount { Id = mount.RowId };
+                            curMount = new Mount { Id = mount.RowId, SortOrder = mount.UIPriority };
                             mountTable.Mounts.Add(curMount);
                         }
                     }

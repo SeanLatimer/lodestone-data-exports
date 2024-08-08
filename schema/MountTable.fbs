@@ -6,6 +6,7 @@ table MountTable {
 
 table Mount {
 	Id:uint32 (key);
+	SortOrder:uint32;
 	NameEn:string;
 	NameFr:string;
 	NameDe:string;

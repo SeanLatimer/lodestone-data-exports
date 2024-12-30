@@ -1,6 +1,8 @@
+attribute "fs_serializer";
+
 namespace FFXIV;
 
-table ItemTable {
+table ItemTable(fs_serializer) {
 	Items:[Item];
 }
 

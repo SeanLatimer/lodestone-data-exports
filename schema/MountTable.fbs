@@ -1,6 +1,8 @@
+attribute "fs_serializer";
+
 namespace FFXIV;
 
-table MountTable {
+table MountTable(fs_serializer) {
 	Mounts:[Mount];
 }
 

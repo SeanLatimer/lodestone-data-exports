@@ -1,12 +1,13 @@
 ﻿using FFXIV;
-using FlatSharp;
 using Lumina;
 using Lumina.Data;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using FlatSharp;
 using Cyalume = Lumina.GameData;
+using ISerializerExtensions = FlatSharp.ISerializerExtensions;
 
 namespace LodestoneDataExporter
 {
@@ -43,7 +44,7 @@ namespace LodestoneDataExporter
             var languages = new[] { Language.English, Language.Japanese, Language.German, Language.French };
             foreach (var lang in languages)
             {
-                var achievementSheet = cyalume.GetExcelSheet<Lumina.Excel.GeneratedSheets.Achievement>(lang);
+                var achievementSheet = cyalume.GetExcelSheet<Lumina.Excel.Sheets.Achievement>(lang);
                 Parallel.ForEach(achievementSheet, new ParallelOptions { MaxDegreeOfParallelism = 4 }, achievement =>
                 {
                     Achievement curAchievement;
@@ -60,22 +61,26 @@ namespace LodestoneDataExporter
                     switch (lang)
                     {
                         case Language.English:
-                            curAchievement.NameEn = achievement.Name;
+                            curAchievement.NameEn = achievement.Name.ExtractText();
                             break;
                         case Language.Japanese:
-                            curAchievement.NameJa = achievement.Name;
+                            curAchievement.NameJa = achievement.Name.ExtractText();
                             break;
                         case Language.German:
-                            curAchievement.NameDe = achievement.Name;
+                            curAchievement.NameDe = achievement.Name.ExtractText();
                             break;
                         case Language.French:
-                            curAchievement.NameFr = achievement.Name;
+                            curAchievement.NameFr = achievement.Name.ExtractText();
                             break;
                     }
                 });
             }
 
-            Serialize(Path.Join(OutputDir, "achievement_table.bin"), itemTable);
+            Serialize(
+                Path.Join(OutputDir, "achievement_table.bin"),
+                AchievementTable.Serializer,
+                itemTable
+            );
         }
 
         private static void ExportClassJobTable(Cyalume cyalume)
@@ -84,36 +89,40 @@ namespace LodestoneDataExporter
             var languages = new[] { Language.English, Language.Japanese, Language.German, Language.French };
             foreach (var lang in languages)
             {
-                var classJobSheet = cyalume.GetExcelSheet<Lumina.Excel.GeneratedSheets.ClassJob>(lang);
+                var classJobSheet = cyalume.GetExcelSheet<Lumina.Excel.Sheets.ClassJob>(lang);
                 foreach (var classJob in classJobSheet)
                 {
                     var curClassJob = classJobTable.ClassJobs.FirstOrDefault(cj => cj.Id == classJob.RowId);
                     if (curClassJob == null)
                     {
                         curClassJob = new ClassJob
-                            { Id = classJob.RowId, Parent = classJob.ClassJobParent.Row, JobIndex = classJob.JobIndex };
+                            { Id = classJob.RowId, Parent = classJob.ClassJobParent.RowId, JobIndex = classJob.JobIndex };
                         classJobTable.ClassJobs.Add(curClassJob);
                     }
 
                     switch (lang)
                     {
                         case Language.English:
-                            curClassJob.NameEn = classJob.Name;
+                            curClassJob.NameEn = classJob.Name.ExtractText();
                             break;
                         case Language.Japanese:
-                            curClassJob.NameJa = classJob.Name;
+                            curClassJob.NameJa = classJob.Name.ExtractText();
                             break;
                         case Language.German:
-                            curClassJob.NameDe = classJob.Name;
+                            curClassJob.NameDe = classJob.Name.ExtractText();
                             break;
                         case Language.French:
-                            curClassJob.NameFr = classJob.Name;
+                            curClassJob.NameFr = classJob.Name.ExtractText();
                             break;
                     }
                 }
             }
 
-            Serialize(Path.Join(OutputDir, "classjob_table.bin"), classJobTable);
+            Serialize(
+                Path.Join(OutputDir, "classjob_table.bin"),
+                ClassJobTable.Serializer,
+                classJobTable
+                );
         }
 
         private static void ExportGuardianDeityTable(Cyalume cyalume)
@@ -122,7 +131,7 @@ namespace LodestoneDataExporter
             var languages = new[] { Language.English, Language.Japanese, Language.German, Language.French };
             foreach (var lang in languages)
             {
-                var deitySheet = cyalume.GetExcelSheet<Lumina.Excel.GeneratedSheets.GuardianDeity>(lang);
+                var deitySheet = cyalume.GetExcelSheet<Lumina.Excel.Sheets.GuardianDeity>(lang);
                 foreach (var deity in deitySheet)
                 {
                     var curDeity = deityTable.Deities.FirstOrDefault(d => d.Id == deity.RowId);
@@ -135,22 +144,22 @@ namespace LodestoneDataExporter
                     switch (lang)
                     {
                         case Language.English:
-                            curDeity.NameEn = deity.Name;
+                            curDeity.NameEn = deity.Name.ExtractText();
                             break;
                         case Language.Japanese:
-                            curDeity.NameJa = deity.Name;
+                            curDeity.NameJa = deity.Name.ExtractText();
                             break;
                         case Language.German:
-                            curDeity.NameDe = deity.Name;
+                            curDeity.NameDe = deity.Name.ExtractText();
                             break;
                         case Language.French:
-                            curDeity.NameFr = deity.Name;
+                            curDeity.NameFr = deity.Name.ExtractText();
                             break;
                     }
                 }
             }
 
-            Serialize(Path.Join(OutputDir, "deity_table.bin"), deityTable);
+            Serialize(Path.Join(OutputDir, "deity_table.bin"), DeityTable.Serializer,deityTable);
         }
 
         private static void ExportGrandCompanyTable(Cyalume cyalume)
@@ -159,7 +168,7 @@ namespace LodestoneDataExporter
             var languages = new[] { Language.English, Language.Japanese, Language.German, Language.French };
             foreach (var lang in languages)
             {
-                var gcSheet = cyalume.GetExcelSheet<Lumina.Excel.GeneratedSheets.GrandCompany>(lang);
+                var gcSheet = cyalume.GetExcelSheet<Lumina.Excel.Sheets.GrandCompany>(lang);
                 foreach (var gc in gcSheet)
                 {
                     var curGc = gcTable.GrandCompanies.FirstOrDefault(c => c.Id == gc.RowId);
@@ -172,22 +181,22 @@ namespace LodestoneDataExporter
                     switch (lang)
                     {
                         case Language.English:
-                            curGc.NameEn = gc.Name;
+                            curGc.NameEn = gc.Name.ExtractText();
                             break;
                         case Language.Japanese:
-                            curGc.NameJa = gc.Name;
+                            curGc.NameJa = gc.Name.ExtractText();
                             break;
                         case Language.German:
-                            curGc.NameDe = gc.Name;
+                            curGc.NameDe = gc.Name.ExtractText();
                             break;
                         case Language.French:
-                            curGc.NameFr = gc.Name;
+                            curGc.NameFr = gc.Name.ExtractText();
                             break;
                     }
                 }
             }
 
-            Serialize(Path.Join(OutputDir, "gc_table.bin"), gcTable);
+            Serialize(Path.Join(OutputDir, "gc_table.bin"), GrandCompanyTable.Serializer, gcTable);
         }
 
         private static void ExportItemTable(Cyalume cyalume)
@@ -196,7 +205,7 @@ namespace LodestoneDataExporter
             var languages = new[] { Language.English, Language.Japanese, Language.German, Language.French };
             foreach (var lang in languages)
             {
-                var itemSheet = cyalume.GetExcelSheet<Lumina.Excel.GeneratedSheets.Item>(lang);
+                var itemSheet = cyalume.GetExcelSheet<Lumina.Excel.Sheets.Item>(lang);
                 Parallel.ForEach(itemSheet, new ParallelOptions { MaxDegreeOfParallelism = 4 }, item =>
                 {
                     Item curItem;
@@ -213,22 +222,22 @@ namespace LodestoneDataExporter
                     switch (lang)
                     {
                         case Language.English:
-                            curItem.NameEn = item.Name;
+                            curItem.NameEn = item.Name.ExtractText();
                             break;
                         case Language.Japanese:
-                            curItem.NameJa = item.Name;
+                            curItem.NameJa = item.Name.ExtractText();
                             break;
                         case Language.German:
-                            curItem.NameDe = item.Name;
+                            curItem.NameDe = item.Name.ExtractText();
                             break;
                         case Language.French:
-                            curItem.NameFr = item.Name;
+                            curItem.NameFr = item.Name.ExtractText();
                             break;
                     }
                 });
             }
 
-            Serialize(Path.Join(OutputDir, "item_table.bin"), itemTable);
+            Serialize(Path.Join(OutputDir, "item_table.bin"), ItemTable.Serializer, itemTable);
         }
 
         private static void ExportMinionTable(Cyalume cyalume)
@@ -237,7 +246,7 @@ namespace LodestoneDataExporter
             var languages = new[] { Language.English, Language.Japanese, Language.German, Language.French };
             foreach (var lang in languages)
             {
-                var minionSheet = cyalume.GetExcelSheet<Lumina.Excel.GeneratedSheets.Companion>(lang);
+                var minionSheet = cyalume.GetExcelSheet<Lumina.Excel.Sheets.Companion>(lang);
                 Parallel.ForEach(minionSheet, new ParallelOptions { MaxDegreeOfParallelism = 4 }, minion =>
                 {
                     Minion curMinion;
@@ -254,22 +263,22 @@ namespace LodestoneDataExporter
                     switch (lang)
                     {
                         case Language.English:
-                            curMinion.NameEn = minion.Singular;
+                            curMinion.NameEn = minion.Singular.ExtractText();
                             break;
                         case Language.Japanese:
-                            curMinion.NameJa = minion.Singular;
+                            curMinion.NameJa = minion.Singular.ExtractText();
                             break;
                         case Language.German:
-                            curMinion.NameDe = minion.Singular;
+                            curMinion.NameDe = minion.Singular.ExtractText();
                             break;
                         case Language.French:
-                            curMinion.NameFr = minion.Singular;
+                            curMinion.NameFr = minion.Singular.ExtractText();
                             break;
                     }
                 });
             }
 
-            Serialize(Path.Join(OutputDir, "minion_table.bin"), minionTable);
+            Serialize(Path.Join(OutputDir, "minion_table.bin"),MinionTable.Serializer, minionTable);
         }
 
         private static void ExportMountTable(Cyalume cyalume)
@@ -278,7 +287,7 @@ namespace LodestoneDataExporter
             var languages = new[] { Language.English, Language.Japanese, Language.German, Language.French };
             foreach (var lang in languages)
             {
-                var mountSheet = cyalume.GetExcelSheet<Lumina.Excel.GeneratedSheets.Mount>(lang);
+                var mountSheet = cyalume.GetExcelSheet<Lumina.Excel.Sheets.Mount>(lang);
                 Parallel.ForEach(mountSheet, new ParallelOptions { MaxDegreeOfParallelism = 4 }, mount =>
                 {
                     Mount curMount;
@@ -295,22 +304,22 @@ namespace LodestoneDataExporter
                     switch (lang)
                     {
                         case Language.English:
-                            curMount.NameEn = mount.Singular;
+                            curMount.NameEn = mount.Singular.ExtractText();
                             break;
                         case Language.Japanese:
-                            curMount.NameJa = mount.Singular;
+                            curMount.NameJa = mount.Singular.ExtractText();
                             break;
                         case Language.German:
-                            curMount.NameDe = mount.Singular;
+                            curMount.NameDe = mount.Singular.ExtractText();
                             break;
                         case Language.French:
-                            curMount.NameFr = mount.Singular;
+                            curMount.NameFr = mount.Singular.ExtractText();
                             break;
                     }
                 });
             }
 
-            Serialize(Path.Join(OutputDir, "mount_table.bin"), mountTable);
+            Serialize(Path.Join(OutputDir, "mount_table.bin"),MountTable.Serializer, mountTable);
         }
 
         private static void ExportRaceTable(Cyalume cyalume)
@@ -319,7 +328,7 @@ namespace LodestoneDataExporter
             var languages = new[] { Language.English, Language.Japanese, Language.German, Language.French };
             foreach (var lang in languages)
             {
-                var raceSheet = cyalume.GetExcelSheet<Lumina.Excel.GeneratedSheets.Race>(lang);
+                var raceSheet = cyalume.GetExcelSheet<Lumina.Excel.Sheets.Race>(lang);
                 foreach (var race in raceSheet)
                 {
                     var curRace = raceTable.Races.FirstOrDefault(r => r.Id == race.RowId);
@@ -332,26 +341,26 @@ namespace LodestoneDataExporter
                     switch (lang)
                     {
                         case Language.English:
-                            curRace.NameMasculineEn = race.Masculine;
-                            curRace.NameFeminineEn = race.Feminine;
+                            curRace.NameMasculineEn = race.Masculine.ExtractText();
+                            curRace.NameFeminineEn = race.Feminine.ExtractText();
                             break;
                         case Language.Japanese:
-                            curRace.NameMasculineJa = race.Masculine;
-                            curRace.NameFeminineJa = race.Feminine;
+                            curRace.NameMasculineJa = race.Masculine.ExtractText();
+                            curRace.NameFeminineJa = race.Feminine.ExtractText();
                             break;
                         case Language.German:
-                            curRace.NameMasculineDe = race.Masculine;
-                            curRace.NameFeminineDe = race.Feminine;
+                            curRace.NameMasculineDe = race.Masculine.ExtractText();
+                            curRace.NameFeminineDe = race.Feminine.ExtractText();
                             break;
                         case Language.French:
-                            curRace.NameMasculineFr = race.Masculine;
-                            curRace.NameFeminineFr = race.Feminine;
+                            curRace.NameMasculineFr = race.Masculine.ExtractText();
+                            curRace.NameFeminineFr = race.Feminine.ExtractText();
                             break;
                     }
                 }
             }
 
-            Serialize(Path.Join(OutputDir, "race_table.bin"), raceTable);
+            Serialize(Path.Join(OutputDir, "race_table.bin"), RaceTable.Serializer, raceTable);
         }
 
         private static void ExportReputationTable(Cyalume cyalume)
@@ -360,7 +369,7 @@ namespace LodestoneDataExporter
             var languages = new[] { Language.English, Language.Japanese, Language.German, Language.French };
             foreach (var lang in languages)
             {
-                var repSheet = cyalume.GetExcelSheet<Lumina.Excel.GeneratedSheets.BeastReputationRank>(lang);
+                var repSheet = cyalume.GetExcelSheet<Lumina.Excel.Sheets.BeastReputationRank>(lang);
                 foreach (var rep in repSheet)
                 {
                     var curRep = repTable.Reputations.FirstOrDefault(r => r.Id == rep.RowId);
@@ -373,22 +382,22 @@ namespace LodestoneDataExporter
                     switch (lang)
                     {
                         case Language.English:
-                            curRep.NameEn = rep.Name;
+                            curRep.NameEn = rep.Name.ExtractText();
                             break;
                         case Language.Japanese:
-                            curRep.NameJa = rep.Name;
+                            curRep.NameJa = rep.Name.ExtractText();
                             break;
                         case Language.German:
-                            curRep.NameDe = rep.Name;
+                            curRep.NameDe = rep.Name.ExtractText();
                             break;
                         case Language.French:
-                            curRep.NameFr = rep.Name;
+                            curRep.NameFr = rep.Name.ExtractText();
                             break;
                     }
                 }
             }
 
-            Serialize(Path.Join(OutputDir, "reputation_table.bin"), repTable);
+            Serialize(Path.Join(OutputDir, "reputation_table.bin"), ReputationTable.Serializer, repTable);
         }
 
         private static void ExportTitleTable(Cyalume cyalume)
@@ -397,7 +406,7 @@ namespace LodestoneDataExporter
             var languages = new[] { Language.English, Language.Japanese, Language.German, Language.French };
             foreach (var lang in languages)
             {
-                var titleSheet = cyalume.GetExcelSheet<Lumina.Excel.GeneratedSheets.Title>(lang);
+                var titleSheet = cyalume.GetExcelSheet<Lumina.Excel.Sheets.Title>(lang);
                 Parallel.ForEach(titleSheet, new ParallelOptions { MaxDegreeOfParallelism = 4 }, title =>
                 {
                     Title curTitle;
@@ -414,26 +423,26 @@ namespace LodestoneDataExporter
                     switch (lang)
                     {
                         case Language.English:
-                            curTitle.NameMasculineEn = title.Masculine;
-                            curTitle.NameFeminineEn = title.Feminine;
+                            curTitle.NameMasculineEn = title.Masculine.ExtractText();
+                            curTitle.NameFeminineEn = title.Feminine.ExtractText();
                             break;
                         case Language.Japanese:
-                            curTitle.NameMasculineJa = title.Masculine;
-                            curTitle.NameFeminineJa = title.Feminine;
+                            curTitle.NameMasculineJa = title.Masculine.ExtractText();
+                            curTitle.NameFeminineJa = title.Feminine.ExtractText();
                             break;
                         case Language.German:
-                            curTitle.NameMasculineDe = title.Masculine;
-                            curTitle.NameFeminineDe = title.Feminine;
+                            curTitle.NameMasculineDe = title.Masculine.ExtractText();
+                            curTitle.NameFeminineDe = title.Feminine.ExtractText();
                             break;
                         case Language.French:
-                            curTitle.NameMasculineFr = title.Masculine;
-                            curTitle.NameFeminineFr = title.Feminine;
+                            curTitle.NameMasculineFr = title.Masculine.ExtractText();
+                            curTitle.NameFeminineFr = title.Feminine.ExtractText();
                             break;
                     }
                 });
             }
 
-            Serialize(Path.Join(OutputDir, "title_table.bin"), titleTable);
+            Serialize(Path.Join(OutputDir, "title_table.bin"), TitleTable.Serializer, titleTable);
         }
 
         private static void ExportTownTable(Cyalume cyalume)
@@ -442,7 +451,7 @@ namespace LodestoneDataExporter
             var languages = new[] { Language.English, Language.Japanese, Language.German, Language.French };
             foreach (var lang in languages)
             {
-                var townSheet = cyalume.GetExcelSheet<Lumina.Excel.GeneratedSheets.Town>(lang);
+                var townSheet = cyalume.GetExcelSheet<Lumina.Excel.Sheets.Town>(lang);
                 foreach (var town in townSheet)
                 {
                     var curTown = townTable.Towns.FirstOrDefault(t => t.Id == town.RowId);
@@ -455,22 +464,22 @@ namespace LodestoneDataExporter
                     switch (lang)
                     {
                         case Language.English:
-                            curTown.NameEn = town.Name;
+                            curTown.NameEn = town.Name.ExtractText();
                             break;
                         case Language.Japanese:
-                            curTown.NameJa = town.Name;
+                            curTown.NameJa = town.Name.ExtractText();
                             break;
                         case Language.German:
-                            curTown.NameDe = town.Name;
+                            curTown.NameDe = town.Name.ExtractText();
                             break;
                         case Language.French:
-                            curTown.NameFr = town.Name;
+                            curTown.NameFr = town.Name.ExtractText();
                             break;
                     }
                 }
             }
 
-            Serialize(Path.Join(OutputDir, "town_table.bin"), townTable);
+            Serialize(Path.Join(OutputDir, "town_table.bin"), TownTable.Serializer, townTable);
         }
 
         private static void ExportTribeTable(Cyalume cyalume)
@@ -479,7 +488,7 @@ namespace LodestoneDataExporter
             var languages = new[] { Language.English, Language.Japanese, Language.German, Language.French };
             foreach (var lang in languages)
             {
-                var tribeSheet = cyalume.GetExcelSheet<Lumina.Excel.GeneratedSheets.Tribe>(lang);
+                var tribeSheet = cyalume.GetExcelSheet<Lumina.Excel.Sheets.Tribe>(lang);
                 foreach (var tribe in tribeSheet)
                 {
                     var curTribe = tribeTable.Tribes.FirstOrDefault(t => t.Id == tribe.RowId);
@@ -492,33 +501,33 @@ namespace LodestoneDataExporter
                     switch (lang)
                     {
                         case Language.English:
-                            curTribe.NameMasculineEn = tribe.Masculine;
-                            curTribe.NameFeminineEn = tribe.Feminine;
+                            curTribe.NameMasculineEn = tribe.Masculine.ExtractText();
+                            curTribe.NameFeminineEn = tribe.Feminine.ExtractText();
                             break;
                         case Language.Japanese:
-                            curTribe.NameMasculineJa = tribe.Masculine;
-                            curTribe.NameFeminineJa = tribe.Feminine;
+                            curTribe.NameMasculineJa = tribe.Masculine.ExtractText();
+                            curTribe.NameFeminineJa = tribe.Feminine.ExtractText();
                             break;
                         case Language.German:
-                            curTribe.NameMasculineDe = tribe.Masculine;
-                            curTribe.NameFeminineDe = tribe.Feminine;
+                            curTribe.NameMasculineDe = tribe.Masculine.ExtractText();
+                            curTribe.NameFeminineDe = tribe.Feminine.ExtractText();
                             break;
                         case Language.French:
-                            curTribe.NameMasculineFr = tribe.Masculine;
-                            curTribe.NameFeminineFr = tribe.Feminine;
+                            curTribe.NameMasculineFr = tribe.Masculine.ExtractText();
+                            curTribe.NameFeminineFr = tribe.Feminine.ExtractText();
                             break;
                     }
                 }
             }
 
-            Serialize(Path.Join(OutputDir, "tribe_table.bin"), tribeTable);
+            Serialize(Path.Join(OutputDir, "tribe_table.bin"), TribeTable.Serializer, tribeTable);
         }
 
-        private static void Serialize<T>(string path, T obj) where T : class
+        private static void Serialize<T>(string path, ISerializer<T> serializer, T obj) where T : class
         {
-            var maxBytesNeeded = FlatBufferSerializer.Default.GetMaxSize(obj);
+            var maxBytesNeeded = serializer.GetMaxSize(obj);
             var buffer = new byte[maxBytesNeeded];
-            var bytesWritten = FlatBufferSerializer.Default.Serialize(obj, buffer);
+            var bytesWritten = serializer.Write(buffer, obj);
             var bytesToWrite = buffer[..bytesWritten];
             File.WriteAllBytes(path, bytesToWrite);
         }

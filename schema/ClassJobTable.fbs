@@ -1,6 +1,8 @@
+attribute "fs_serializer";
+
 namespace FFXIV;
 
-table ClassJobTable {
+table ClassJobTable(fs_serializer) {
 	ClassJobs:[ClassJob];
 }
 

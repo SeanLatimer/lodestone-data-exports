@@ -1,6 +1,8 @@
+attribute "fs_serializer";
+
 namespace FFXIV;
 
-table RaceTable {
+table RaceTable(fs_serializer) {
 	Races:[Race];
 }
 

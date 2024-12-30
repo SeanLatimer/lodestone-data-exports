@@ -1,6 +1,8 @@
+attribute "fs_serializer";
+
 namespace FFXIV;
 
-table TribeTable {
+table TribeTable(fs_serializer) {
 	Tribes:[Tribe];
 }
 

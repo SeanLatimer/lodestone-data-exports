@@ -1,6 +1,8 @@
+attribute "fs_serializer";
+
 namespace FFXIV;
 
-table GrandCompanyTable {
+table GrandCompanyTable(fs_serializer) {
 	GrandCompanies:[GrandCompany];
 }
 

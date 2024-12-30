@@ -1,6 +1,8 @@
+attribute "fs_serializer";
+
 namespace FFXIV;
 
-table ReputationTable {
+table ReputationTable(fs_serializer) {
 	Reputations:[Reputation];
 }
 

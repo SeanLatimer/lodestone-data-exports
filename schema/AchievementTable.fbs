@@ -1,6 +1,8 @@
+attribute "fs_serializer";
+
 namespace FFXIV;
 
-table AchievementTable {
+table AchievementTable(fs_serializer) {
 	Achievements:[Achievement];
 }
 
